@@ -26,12 +26,22 @@ today_date = now.strftime('%Y-%m-%d')
 timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
 
 BACKUP_DIR = os.environ.get("BACKUP_DIR", "/app/backup")
+STATUS_LOG = os.path.join(BACKUP_DIR, f"backup_status_{today_date}.log")
+FDP_URLS_FILE = os.environ.get("FDP_URLS_FILE", "/app/config/fdp_urls.txt")
 
-# FDP URLs
-fdpURLs = [
-    "http://fair.healthdataportal.eu:8080/",
-    "https://sciensano.healthdataportal.eu:443/"
-]
+
+try:
+    with open(FDP_URLS_FILE, "r") as f:
+        fdpURLs = [line.strip() for line in f.readlines() if line.strip()]
+except Exception as e:
+    print(f"❌ Could not read FDP_URLS_FILE: {FDP_URLS_FILE}\n{e}")
+    fdpURLs = []
+
+def write_status_log(message):
+    timestamped = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {message}"
+    with open(STATUS_LOG, "a") as log:
+        log.write(timestamped + "\n")
+
 
 # Sanitize file/folder names
 def sanitize_filename(name):
@@ -60,6 +70,7 @@ def backup_fdp(fdpURL):
         res.raise_for_status()
     except Exception as e:
         print(f"❌ Error fetching root FDP from {fdpURL}: {e}")
+        write_status_log(f"❌ ERROR   | {base_fdp_uri} | Failed to fetch root FDP: {e}")
         return
 
     fdpStore = Graph()
@@ -157,8 +168,7 @@ def backup_fdp(fdpURL):
     shutil.rmtree(folder_path)
 
     print(f"🗜️ Zipped backup: {zip_filename}")
-
-
+    write_status_log(f"✅ SUCCESS | {base_fdp_uri} | {os.path.basename(zip_filename)}")
 
 # Run backups in parallel
 with ThreadPoolExecutor(max_workers=4) as executor:
