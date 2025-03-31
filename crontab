@@ -1,0 +1,14 @@
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of the month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of the week (0 - 6)(Sunday to Saturday;
+# │ │ │ │ │                        7 is also Sunday on some systems)
+# │ │ │ │ │
+# │ │ │ │ │
+# * * * * * <command to execute>
+
+# Run FDP backup every day at 8pm
+0 20 * * * python /app/fdp_backup.py >> /app/output/backup_8pm.log 2>&1
+
+# */30 * * * * python /app/fdp_backup.py >> /app/output/backup_30min.log 2>&1
