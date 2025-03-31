@@ -44,9 +44,12 @@ def backup_fdp(fdpURL):
     parsed_url = urlparse(fdpURL)
     base_fdp_uri = parsed_url.hostname
 
-    # Setup folder
+    # Subfolder per FDP host
+    fdp_subfolder = os.path.join(BACKUP_DIR, base_fdp_uri)
+    os.makedirs(fdp_subfolder, exist_ok=True)
+
     folder_name = f'FDP-Backup-{base_fdp_uri}-{timestamp}'
-    folder_path = os.path.join(BACKUP_DIR, folder_name)
+    folder_path = os.path.join(fdp_subfolder, folder_name)
     os.makedirs(folder_path, exist_ok=True)
 
     print(f'\n🔄 Starting backup for {fdpURL}')
@@ -149,11 +152,12 @@ def backup_fdp(fdpURL):
     print(f"✅ Backup completed for {fdpURL}, saved in: {folder_path}")
 
     # Zip the backup folder
-    zip_filename = os.path.join(BACKUP_DIR, f"{folder_name}.zip")
-    shutil.make_archive(base_name=os.path.join(BACKUP_DIR, folder_name), format='zip', root_dir=folder_path)
-    shutil.rmtree(folder_path) # Deleted original folder after zipping
+    zip_filename = os.path.join(fdp_subfolder, f"{folder_name}.zip")
+    shutil.make_archive(base_name=os.path.join(fdp_subfolder, folder_name), format='zip', root_dir=folder_path)
+    shutil.rmtree(folder_path)
 
     print(f"🗜️ Zipped backup: {zip_filename}")
+
 
 
 # Run backups in parallel
