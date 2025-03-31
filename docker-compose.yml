@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  fdp-backup:
+    build: .
+    container_name: fdp-backup
+    volumes:
+      - ./backup:/app/backup
+      - ./config:/app/config
+    environment:
+      FDP_URLS_FILE: config/fdp_urls.txt
+      FDP_CRON_SCHEDULE: "0 23 * * *" # Every day at 11PM
+      ZIP_DELETE_ORIGINAL: "true"
