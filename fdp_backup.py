@@ -150,7 +150,7 @@ def backup_fdp(fdpURL):
 
     # Zip the backup folder
     zip_filename = os.path.join(BACKUP_DIR, f"{folder_name}.zip")
-    shutil.make_archive(base_name=folder_name, format='zip', root_dir=folder_path)
+    shutil.make_archive(base_name=os.path.join(BACKUP_DIR, folder_name), format='zip', root_dir=folder_path)
     shutil.rmtree(folder_path) # Deleted original folder after zipping
 
     print(f"🗜️ Zipped backup: {zip_filename}")
