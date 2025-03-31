@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FDP Backup Dashboard</title>
+  <meta http-equiv="refresh" content="30">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+    }
+    header {
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #2c3e50;
+    }
+    h2, h3 {
+      color: #34495e;
+      margin-top: 2rem;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      background: #fff;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .log-success {
+      color: #27ae60;
+    }
+    .log-error {
+      color: #c0392b;
+    }
+    .timestamp {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+    }
+    footer {
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 2rem;
+    }
+    a {
+      text-decoration: none;
+      color: #2980b9;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    form input, form button {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+    }
+    form button {
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #1c6391;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📦 FDP Backup Dashboard</h1>
+    <p class="timestamp">Last refreshed: {{ timestamp }}</p>
+    <form method="post" action="/run-backup">
+      <button type="submit">▶ Run Backup Now</button>
+    </form>
+  </header>
+
+  <section>
+    <h2>🌐 Configured FDP URLs</h2>
+    <ul>
+      {% for url in fdp_urls %}
+        <li>{{ url }}
+          <form method="post" action="/delete-fdp" style="display:inline">
+            <input type="hidden" name="delete_url" value="{{ url }}">
+            <button type="submit">Delete</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="/add-fdp">
+      <input type="text" name="new_url" placeholder="Enter new FDP URL">
+      <button type="submit">Add URL</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>🕒 Scheduled Backups</h2>
+    <ul>
+      {% for job in cron_jobs %}
+        <li>{{ job.expression }} — Next: {{ job.next_run }}
+          <form method="post" action="/delete-cron" style="display:inline">
+            <input type="hidden" name="cron_expr" value="{{ job.expression }}">
+            <button type="submit">Delete</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="/add-cron">
+      <input type="text" name="cron_expr" placeholder="0 20 * * * /path/to/script.py">
+      <button type="submit">Add Schedule</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>📝 Latest Logs</h2>
+    {% for fdp, entries in logs.items() %}
+      <h3>{{ fdp }}</h3>
+      <ul>
+        {% for entry in entries %}
+          <li class="log-success">{{ entry }}</li>
+        {% endfor %}
+      </ul>
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>🗜️ Backup Archives</h2>
+    <ul>
+      {% for zipf in zip_files %}
+        <li><a href="/{{ zipf }}">{{ zipf }}</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <footer>
+    FDP Backup Viewer | Auto-refreshes every 30 seconds
+  </footer>
+</body>
+</html>
