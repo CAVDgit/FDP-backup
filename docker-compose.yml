@@ -2,8 +2,9 @@ services:
   fdp-backup:
     build: .
     container_name: fdp-backup
+    ports:
+      - "3000:8080"  #  Access log
     volumes:
       - ./backup:/app/backup
       - ./config:/app/config
-    environment:
-      FDP_URLS_FILE: config/fdp_urls.txt
+      - ./crontab/fdp-cron:/etc/cron.d/fdp-cron:ro
