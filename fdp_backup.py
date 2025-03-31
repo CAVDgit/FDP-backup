@@ -20,8 +20,12 @@ DCAT = Namespace('http://www.w3.org/ns/dcat#')
 ADMS = Namespace('http://www.w3.org/ns/adms#')
 HEALTHDCATAP = Namespace('http://healthdataportal.eu/ns/health#')
 
-# Format the current date
-today_date = datetime.now().strftime('%Y-%m-%d')
+# Format current date and time as YYYY-MM-DD_HH-MM-SS
+now = datetime.now()
+today_date = now.strftime('%Y-%m-%d')
+timestamp = now.strftime('%Y-%m-%d_%H-%M-%S')
+
+BACKUP_DIR = os.environ.get("BACKUP_DIR", "/app/backup")
 
 # FDP URLs
 fdpURLs = [
@@ -41,8 +45,8 @@ def backup_fdp(fdpURL):
     base_fdp_uri = parsed_url.hostname
 
     # Setup folder
-    folder_name = f'FDP-Backup-{base_fdp_uri}-{today_date}'
-    folder_path = os.path.join(os.getcwd(), folder_name)
+    folder_name = f'FDP-Backup-{base_fdp_uri}-{timestamp}'
+    folder_path = os.path.join(BACKUP_DIR, folder_name)
     os.makedirs(folder_path, exist_ok=True)
 
     print(f'\n🔄 Starting backup for {fdpURL}')
@@ -145,7 +149,7 @@ def backup_fdp(fdpURL):
     print(f"✅ Backup completed for {fdpURL}, saved in: {folder_path}")
 
     # Zip the backup folder
-    zip_filename = os.path.join(os.getcwd(), f"{folder_name}.zip")
+    zip_filename = os.path.join(BACKUP_DIR, f"{folder_name}.zip")
     shutil.make_archive(base_name=folder_name, format='zip', root_dir=folder_path)
     shutil.rmtree(folder_path) # Deleted original folder after zipping
 
