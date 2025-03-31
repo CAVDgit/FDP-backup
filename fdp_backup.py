@@ -70,7 +70,7 @@ def backup_fdp(fdpURL):
         res.raise_for_status()
     except Exception as e:
         print(f"❌ Error fetching root FDP from {fdpURL}: {e}")
-        write_status_log(f" ERROR   | {base_fdp_uri} | Failed to fetch root FDP: {e}")
+        write_status_log(f"❌ ERROR   | {base_fdp_uri} | Failed to fetch root FDP: {e}")
         return
 
     fdpStore = Graph()
@@ -168,7 +168,7 @@ def backup_fdp(fdpURL):
     shutil.rmtree(folder_path)
 
     print(f"🗜️ Zipped backup: {zip_filename}")
-    write_status_log(f" SUCCESS | {base_fdp_uri} | {os.path.basename(zip_filename)}")
+    write_status_log(f"✅ SUCCESS | {base_fdp_uri} | {os.path.basename(zip_filename)}")
 
 # Run backups in parallel
 with ThreadPoolExecutor(max_workers=4) as executor:
