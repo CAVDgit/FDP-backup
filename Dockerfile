@@ -21,7 +21,7 @@ RUN chmod 0644 /etc/cron.d/fdp-cron && \
     crontab /etc/cron.d/fdp-cron
 
 # Create the log directory if it doesn't exist
-RUN mkdir -p /app/output
+RUN mkdir -p /app/backup
 
 # Start cron in foreground
 CMD ["cron", "-f"]
