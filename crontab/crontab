@@ -15,5 +15,5 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Run FDP backup every day at 8pm
 0 20 * * * /usr/local/bin/python /app/fdp_backup.py
 
-# Run FDP backup every 5 minutes
-*/5 * * * * /usr/local/bin/python /app/fdp_backup.py
+# Run FDP backup every 30 minutes
+*/30 * * * * /usr/local/bin/python /app/fdp_backup.py
