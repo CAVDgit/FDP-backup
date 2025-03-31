@@ -1,3 +1,6 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 # ┌───────────── minute (0 - 59)
 # │ ┌───────────── hour (0 - 23)
 # │ │ ┌───────────── day of the month (1 - 31)
@@ -8,7 +11,9 @@
 # │ │ │ │ │
 # * * * * * <command to execute>
 
-# Run FDP backup every day at 8pm
-0 20 * * * python /app/fdp_backup.py >> /app/output/backup_8pm.log 2>&1
 
-# */30 * * * * python /app/fdp_backup.py >> /app/output/backup_30min.log 2>&1
+# Run FDP backup every day at 8pm
+0 20 * * * /usr/local/bin/python /app/fdp_backup.py
+
+# Run FDP backup every 5 minutes
+*/5 * * * * /usr/local/bin/python /app/fdp_backup.py
