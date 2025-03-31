@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, unquote
 from collections import defaultdict
 from croniter import croniter
 from datetime import datetime
+from cron_descriptor import get_description
 
 BACKUP_DIR = os.environ.get("LOG_SERVER_DIR", "/app/backup")
 CRON_FILE = "/etc/cron.d/fdp-cron"
@@ -48,12 +49,23 @@ class DashboardHandler(BaseHTTPRequestHandler):
                         if line.strip() != delete_url:
                             f.write(line)
 
-        elif self.path == "/add-cron":
-            expr = data.get("cron_expr", [""])[0].strip()
-            if expr:
-                with open(CRON_FILE, "a") as f:
-                    f.write(expr + "\n")
-                os.system(f"crontab {CRON_FILE}")
+        elif self.path == "/add-schedule":
+            time_val = data.get("time", [""])[0]
+            freq = data.get("frequency", ["daily"])[0]
+            hour, minute = map(int, time_val.split(":"))
+            if freq == "daily":
+                expr = f"{minute} {hour} * * *"
+            elif freq == "weekly":
+                expr = f"{minute} {hour} * * 1"
+            elif freq == "monthly":
+                expr = f"{minute} {hour} 1 * *"
+            else:
+                expr = f"{minute} {hour} * * *"
+            cmd = "/usr/local/bin/python /app/fdp_backup.py"
+            full_cron = f"{expr} {cmd}"
+            with open(CRON_FILE, "a") as f:
+                f.write(full_cron + "\n")
+            os.system(f"crontab {CRON_FILE}")
 
         elif self.path == "/delete-cron":
             expr = data.get("cron_expr", [""])[0].strip()
@@ -69,7 +81,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         elif self.path == "/run-backup":
             try:
                 output = subprocess.check_output(["python", "/app/fdp_backup.py"], stderr=subprocess.STDOUT)
-                last_backup_status = output.decode("utf-8")[-500:]  # Store the last part
+                last_backup_status = output.decode("utf-8")[-500:]
             except subprocess.CalledProcessError as e:
                 last_backup_status = f"❌ Backup failed:\n{e.output.decode('utf-8')}"
 
@@ -102,7 +114,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                                 for url in fdp_urls]))
 
         cron_block = "\n".join([
-            f"<li>{job['expression']} — Next: {job['next_run']}<form method='post' action='/delete-cron' style='display:inline'>"
+            f"<li>{job['expression']} — Next: {job['next_run']}<br><small>{job['description']}</small><form method='post' action='/delete-cron' style='display:inline'>"
             f"<input type='hidden' name='cron_expr' value='{job['expression']}'><button type='submit'>Delete</button></form></li>"
             for job in cron_jobs
         ])
@@ -150,13 +162,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
         with open(CRON_FILE, "r") as f:
             for line in f:
                 line = line.strip()
-                if not line or line.startswith("#"):
+                if (not line or line.startswith("#") or line.startswith("SHELL=") 
+                        or line.startswith("PATH=") or "/fdp_backup.py" not in line):
                     continue
                 try:
                     parts = line.split()
+                    if len(parts) < 6:
+                        continue
                     expr = " ".join(parts[:5])
                     next_run = croniter(expr, now).get_next(datetime).strftime('%Y-%m-%d %H:%M')
-                    jobs.append({"expression": line, "next_run": next_run})
+                    description = get_description(expr)
+                    jobs.append({"expression": line, "next_run": next_run, "description": description})
                 except:
                     continue
         return jobs
