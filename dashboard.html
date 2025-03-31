@@ -105,20 +105,17 @@
   </section>
 
   <section>
-    <h2>🕒 Scheduled Backups</h2>
-    <ul>
-      {% for job in cron_jobs %}
-        <li>{{ job.expression }} — Next: {{ job.next_run }}
-          <form method="post" action="/delete-cron" style="display:inline">
-            <input type="hidden" name="cron_expr" value="{{ job.expression }}">
-            <button type="submit">Delete</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
-    <form method="post" action="/add-cron">
-      <input type="text" name="cron_expr" placeholder="0 20 * * * /path/to/script.py">
-      <button type="submit">Add Schedule</button>
+    <h2>🕒 Schedule a Backup</h2>
+    <form method="post" action="/add-schedule">
+      <label>Time:</label>
+      <input type="time" name="time" required>
+      <label>Frequency:</label>
+      <select name="frequency">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+      <button type="submit">Add Backup Schedule</button>
     </form>
   </section>
 
